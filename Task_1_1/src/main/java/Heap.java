@@ -1,24 +1,31 @@
-public class Heap {
-    int[] arr;
-    int size;
+import java.util.Arrays;
 
-    Heap(int n) {
+class HeapSort {
+    private static int[] arr;
+    private static int size;
+
+    // Initialize heap array and copy values to this array
+    /* Heap(int n, int [] src) {
         arr = new int[n];
         size = n;
-    }
+        for (int i = 0; i < n; i++) {
+            arr[i] = src[i];
+        }
+    } */
 
-    public void swap(int i, int j) {
+    private static void swap(int i, int j) {
         int temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 
-    public void siftDown(int i) {
+    private static void siftDown(int i) {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
         int smallest = i;
-        if (left < size && arr[left] > arr[smallest])
+        if (left < size && arr[left] > arr[smallest]) {
             smallest = left;
+        }
         if (right < size && arr[right] > arr[smallest]) {
             smallest = right;
         }
@@ -28,14 +35,26 @@ public class Heap {
         }
     }
 
-    public void buildHeap() {
+    private static void buildHeap() {
         int len = size;
         for (int i = (len/2); i >= 0; i--) {
             siftDown(i);
         }
     }
 
-    public void heapSort() {
+    // Sorts elements in heap array and return it
+    public static int [] sort(int n, int [] src) {
+
+        arr = new int[n];
+        size = n;
+        for (int i = 0; i < n; i++) {
+            arr[i] = src[i];
+        }
+
+        if (size <= 1) {
+            return arr;
+        }
+
         buildHeap();
         int length = size;
         for (int i = 0; i < length; i++) {
@@ -44,6 +63,14 @@ public class Heap {
             siftDown(0);
         }
         size = length;
+
+        return arr;
+    }
+
+    // This wrapper is just for tests
+    public static int[] testSort(int[] array) {
+
+        return HeapSort.sort(array.length, array);
     }
 
 }
