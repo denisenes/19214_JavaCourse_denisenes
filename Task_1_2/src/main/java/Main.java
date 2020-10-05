@@ -1,37 +1,41 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Main {
 
-    public static ArrayList<Integer> findString(String path, String str) {
-        ArrayList<Integer> indexes = new ArrayList<>();
+    /**
+     * поиск всех вхождений:
+     *  buffer = concat(chunk1, chunk2)
+     * 1) из входного потока читаем в буфер, размер которого равен chunk1 + chunk2 = 2*str.length
+     * 2) ищем вхождение подстроки в этом буфере
+     * 3) далее в chunk1 записываем chunk2, а в chunk2 читаем новые данные из входного потока
+     * 4) повторяем 2 и 3, пока во входном потоке есть данные
+     *
+     * @param inStream - поток ввода, в котором ищется подстрока str
+     * @param str - искомая подстрока
+     * @return indexes - лист индексов позиций искомой подстроки
+     */
+    public static ArrayList<Long> findString(InputStream inStream, String str) {
+        ArrayList<Long> indexes = new ArrayList<>();
 
-        try {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))) {
             int len = str.length();
-
-            File file = new File("./" + path);
-            FileReader freader = new FileReader(file);
-
-            BufferedReader reader = new BufferedReader(freader);
 
             char[] chunk1 = new char[len];
             char[] chunk2 = new char[len];
             int res1 = reader.read(chunk1, 0, len);
             int res = reader.read(chunk2, 0, len);
 
-            if (res1 != -1 && res == -1 && Arrays.toString(chunk1).equals(str)) {
-                indexes.add(0);
+            if (res1 != -1 && res == -1 && Arrays.equals(chunk1, str.toCharArray())) {
+                indexes.add(0L);
                 return indexes;
             }
 
-            int globalID = 0;
+            String chunkStr;
+            long globalID = 0;
             while (res != -1) {
-                String chunkStr = String.valueOf(chunk1).concat(String.valueOf(chunk2));
+                chunkStr = String.valueOf(chunk1).concat(String.valueOf(chunk2));
                 //System.out.println("String: " + chunkStr);
                 int index = 0;
                 index = chunkStr.indexOf(str, index);
@@ -64,11 +68,17 @@ public class Main {
         String path = read.nextLine();
         String str = read.nextLine();
 
-        ArrayList<Integer> list = findString(path, str);
-        list.toArray();
+        try (InputStream in = new FileInputStream("./" + path)) {
 
-        for (int i : list) {
-            System.out.print(i + " ");
+            ArrayList<Long> list = findString(in, str);
+            list.toArray();
+
+            for (long i : list) {
+                System.out.print(i + " ");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
