@@ -4,6 +4,18 @@ import java.util.*;
 
 public class Main {
 
+    private static void swapCharBuffers(char [] b1, char [] b2) {
+        char [] tmp = b1;
+        b1 = b2;
+        b2 = tmp;
+    }
+
+    private static void swapStrings(String s1, String s2) {
+        String tmp = s1;
+        s1 = s2;
+        s2 = tmp;
+    }
+
     /**
      * поиск всех вхождений:
      *  buffer = concat(chunk1, chunk2)
@@ -16,7 +28,7 @@ public class Main {
      * @param str - искомая подстрока
      * @return indexes - лист индексов позиций искомой подстроки
      */
-    public static ArrayList<Long> findString(InputStream inStream, String str) {
+    public static ArrayList<Long> findString(InputStream inStream, String str) throws IOException {
         ArrayList<Long> indexes = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))) {
@@ -24,19 +36,23 @@ public class Main {
 
             char[] chunk1 = new char[len];
             char[] chunk2 = new char[len];
+            String chunk1str;
+            String chunk2str;
+            String chunkStr;
+
             int res1 = reader.read(chunk1, 0, len);
             int res = reader.read(chunk2, 0, len);
+            chunk1str = String.valueOf(chunk1);
+            chunk2str = String.valueOf(chunk2);
 
             if (res1 != -1 && res == -1 && Arrays.equals(chunk1, str.toCharArray())) {
                 indexes.add(0L);
                 return indexes;
             }
 
-            String chunkStr;
             long globalID = 0;
             while (res != -1) {
-                chunkStr = String.valueOf(chunk1).concat(String.valueOf(chunk2));
-                //System.out.println("String: " + chunkStr);
+                chunkStr = chunk1str.concat(chunk2str);
                 int index = 0;
                 index = chunkStr.indexOf(str, index);
                 if (index != -1) {
@@ -48,15 +64,13 @@ public class Main {
                     }
                 }
                 globalID += str.length();
-                chunk1 = Arrays.copyOf(chunk2, len);
-                res = reader.read(chunk2, 0, len);
-                //System.out.println(chunk1);
-                //System.out.println(chunk2);
-                //System.out.println("====");
-            }
+                //swap
+                swapCharBuffers(chunk1, chunk2);
+                swapStrings(chunk1str, chunk2str);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+                res = reader.read(chunk2, 0, len);
+                chunk2str = String.valueOf(chunk2);
+            }
         }
 
         return indexes;

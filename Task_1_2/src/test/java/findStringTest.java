@@ -18,7 +18,7 @@ public class findStringTest {
     }
 
     @Test
-    public void findString() {
+    public void findString() throws IOException {
         //-- test 1 --
         ArrayList<Long> test1 = new ArrayList<>();
         test1.add(30L);
