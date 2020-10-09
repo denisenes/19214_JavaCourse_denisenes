@@ -3,6 +3,11 @@ import junit.framework.TestCase;
 public class StackTest extends TestCase {
 
     public void test() {
+        Stack<Integer> sss = new Stack<Integer>();
+        sss.push(0);
+        sss.pop();
+        sss.pop();
+
         Stack<Integer> stack = new Stack<Integer>();
         stack.push(0);
         stack.push(1);

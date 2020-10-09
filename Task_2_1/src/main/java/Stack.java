@@ -1,3 +1,4 @@
+import java.util.EmptyStackException;
 import java.util.Iterator;
 
 public class Stack<T> implements Iterable<T> {
@@ -49,12 +50,12 @@ public class Stack<T> implements Iterable<T> {
      * Get element from stack
      * @return
      */
-    public T pop() {
+    public T pop() throws EmptyStackException {
         if (counter != 0) {
             counter--;
             return (T) container[counter];
         } else {
-            return null;
+            throw new EmptyStackException();
         }
     }
 
