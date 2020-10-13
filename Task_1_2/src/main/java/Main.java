@@ -4,18 +4,6 @@ import java.util.*;
 
 public class Main {
 
-    private static void swapCharBuffers(char [] b1, char [] b2) {
-        char [] tmp = b1;
-        b1 = b2;
-        b2 = tmp;
-    }
-
-    private static void swapStrings(String s1, String s2) {
-        String tmp = s1;
-        s1 = s2;
-        s2 = tmp;
-    }
-
     /**
      * поиск всех вхождений:
      *  buffer = concat(chunk1, chunk2)
@@ -30,46 +18,58 @@ public class Main {
      */
     public static ArrayList<Long> findString(InputStream inStream, String str) throws IOException {
         ArrayList<Long> indexes = new ArrayList<>();
+        int strlen = str.length();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, StandardCharsets.UTF_8))) {
-            int len = str.length();
 
-            char[] chunk1 = new char[len];
-            char[] chunk2 = new char[len];
-            String chunk1str;
-            String chunk2str;
-            String chunkStr;
+            char[] chunk1 = new char[strlen];
+            char[] chunk2 = new char[strlen];
+            char[] strarr = str.toCharArray();
 
-            int res1 = reader.read(chunk1, 0, len);
-            int res = reader.read(chunk2, 0, len);
-            chunk1str = String.valueOf(chunk1);
-            chunk2str = String.valueOf(chunk2);
+            int res1 = reader.read(chunk1, 0, strlen);
+            int res = reader.read(chunk2, 0, strlen);
 
-            if (res1 != -1 && res == -1 && Arrays.equals(chunk1, str.toCharArray())) {
+            if (Arrays.equals(chunk1, str.toCharArray())) {
                 indexes.add(0L);
-                return indexes;
+                if (res1 != -1 && res == -1) {
+                    return indexes;
+                }
             }
 
             long globalID = 0;
             while (res != -1) {
-                chunkStr = chunk1str.concat(chunk2str);
-                int index = 0;
-                index = chunkStr.indexOf(str, index);
-                if (index != -1) {
-                    if (indexes.size() == 0) {
-                        indexes.add(globalID + index);
-                    } else {
-                        if (indexes.get(indexes.size()-1) != index+globalID)
-                            indexes.add(globalID + index);
+                int diff = res;
+                // нереальная мега крутая часть для поиска вхождений подстроки в два чанка без их объединения
+                // как же люблю O(n^2)...        :( <-- грусть
+                for (int i = 1; i <= diff; i++) {
+                    int checkFlag = 1; // становится нулем, если найдены 2 неодинаковых символа
+                    for (int j = 0; j < strarr.length; j++) {
+                        int id = i + j;
+                        if (id < chunk1.length) { //если вылезаем за первый чанк, то типа шарим во втором
+                            if (chunk1[id] != strarr[j]) {
+                                checkFlag = 0;
+                                //String s = Character.toString(chunk1[id]) +  " " + Character.toString(strarr[j]) + "\n";
+                                //System.out.print(s);
+                            }
+                        } else {
+                            if (chunk2[id - chunk1.length] != strarr[j]) {
+                                checkFlag = 0;
+                                //String s = Character.toString(chunk2[id - chunk1.length]) +  " " + Character.toString(strarr[j]) + "\n";
+                                //System.out.print(s);
+                            }
+                        }
+                    }
+                    if (checkFlag == 1) {
+                        indexes.add(globalID + i);
                     }
                 }
-                globalID += str.length();
-                //swap
-                swapCharBuffers(chunk1, chunk2);
-                swapStrings(chunk1str, chunk2str);
 
-                res = reader.read(chunk2, 0, len);
-                chunk2str = String.valueOf(chunk2);
+                globalID += str.length();
+                //System.out.print("Chunk1: " + Arrays.toString(chunk1) + " chunk2: " + Arrays.toString(chunk2) + "\n");
+                char[] temp = chunk1;
+                chunk1 = chunk2;
+                chunk2 = temp;
+                res = reader.read(chunk2, 0, strlen);
             }
         }
 
@@ -84,8 +84,8 @@ public class Main {
 
         try (InputStream in = new FileInputStream("./" + path)) {
 
-            ArrayList<Long> list = findString(in, str);
-            list.toArray();
+            ArrayList<Long> list;
+            list = findString(in, str);
 
             for (long i : list) {
                 System.out.print(i + " ");
