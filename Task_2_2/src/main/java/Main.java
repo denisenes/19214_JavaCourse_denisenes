@@ -1,4 +1,4 @@
-import java.util.stream.Stream;
+import java.util.Spliterator;
 
 public class Main {
 
@@ -9,9 +9,26 @@ public class Main {
         queue.insert(1, "Father");
         queue.insert(2, "Son");
 
-        for (String val : queue) {
+        /*String min = queue.extractMin();
+        System.out.println(min);
+
+        min = queue.extractMin();
+        System.out.println(min);
+
+        min = queue.extractMin();
+        System.out.println(min);
+
+        min = queue.extractMin();
+        System.out.println(min);*/
+
+        Spliterator<String> sp = queue.spliterator();
+        sp.forEachRemaining(System.out::print);
+
+        /*for (String val : queue) {
             System.out.println(val);
-        }
+        }*/
+
+
     }
 
 }

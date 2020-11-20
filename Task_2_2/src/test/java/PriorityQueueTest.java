@@ -1,12 +1,14 @@
 import junit.framework.TestCase;
 import org.junit.Assert;
 
-import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class PriorityQueueTest extends TestCase {
 
+    //тесты на очередь
     public void testExtractMin() {
         PriorityQueue<Integer, String> queue = new PriorityQueue<>();
         queue.insert(1, "Hello");
@@ -25,19 +27,21 @@ public class PriorityQueueTest extends TestCase {
         assertEquals((Integer) 1, queue2.extractMin());
     }
 
+    //тесты на stream
     public void testStream() {
         PriorityQueue<Integer, Integer> queue = new PriorityQueue<>();
-        queue.insert(1, 1);
-        queue.insert(2, 2);
-        queue.insert(3, 3);
-        queue.insert(4, 4);
+        queue.insert(20, 1);
+        queue.insert(15, 2);
+        queue.insert(10, 3);
+        queue.insert(0, 4);
 
-        assertStreams(IntStream.of(6, 7, 8, 9), queue.stream().map(x -> x + 5));
-    }
+        Stream<Integer> stream1 = Stream.of(4, 3, 2, 1);
+        Stream<Integer> stream2 = queue.stream();
 
-    private void assertStreams(IntStream s1, Stream<Integer> s2) {
-        int [] arr1 = s2.mapToInt(x -> x).toArray();
-        int [] arr2 =  s1.toArray();
-        Assert.assertArrayEquals(arr1, arr2);
+        Iterator<?> iter1 = stream1.iterator(), iter2 = stream2.iterator();
+        while(iter1.hasNext() && iter2.hasNext()) {
+            assertEquals(iter1.next(), iter2.next());
+        }
+
     }
 }
