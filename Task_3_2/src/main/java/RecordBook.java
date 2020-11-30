@@ -5,36 +5,44 @@ public class RecordBook {
     private final int groupID;
     private final ResultTable resultTable;
 
+    private enum Results {
+        FAIL,
+        ACCEPTED,
+
+        SATISFACTORILY,
+        GOOD,
+        EXCELLENT
+    }
+
     // запись в книжке
     // предмет + оценка или зачет/незачет
     private static class Record {
+
         private final String subjectName;
 
-        // 2-5, если это оценка
-        // 0/1, если это зачет/незачет
-        private final int result;
+        Results result;
 
-        Record(String subjectName, String result) throws IllegalArgumentException {
+        Record(String subjectName, String result) {
             this.subjectName = subjectName;
             if (result.equals("зачет") || result.equals("незачет")) {
                 if (result.equals("зачет")) {
-                    this.result = 1;
+                    this.result = Results.ACCEPTED;
                 } else {
-                    this.result = 0;
+                    this.result = Results.FAIL;
                 }
             } else {
                 switch (result) {
                     case "неудовлетворительно":
-                        this.result = 2;
+                        this.result = Results.FAIL;
                         break;
                     case "удовлетворительно":
-                        this.result = 3;
+                        this.result = Results.SATISFACTORILY;
                         break;
                     case "хорошо":
-                        this.result = 4;
+                        this.result = Results.GOOD;
                         break;
                     case "отлично":
-                        this.result = 5;
+                        this.result = Results.EXCELLENT;
                         break;
                     default:
                         throw new IllegalArgumentException();
@@ -42,8 +50,40 @@ public class RecordBook {
             }
         }
 
-        int getResult() {
+        Results getResult() {
             return this.result;
+        }
+
+        int resultToInt() {
+            switch (result) {
+                case FAIL:
+                    return 0;
+                case ACCEPTED:
+                    return  1;
+                case SATISFACTORILY:
+                    return 3;
+                case GOOD:
+                    return 4;
+                case EXCELLENT:
+                    return 5;
+            }
+            return 0;
+        }
+
+        private String resultToString(Results res) {
+            switch (res) {
+                case FAIL:
+                    return "незачет";
+                case ACCEPTED:
+                    return "зачет";
+                case SATISFACTORILY:
+                    return "удовлетворительно";
+                case GOOD:
+                    return "хорошо";
+                case EXCELLENT:
+                    return "отлично";
+            }
+            return null;
         }
 
         String getSubject() {
@@ -163,12 +203,12 @@ public class RecordBook {
         int lastSemester = resultTable.getSemesters();
         Scholarship scholarship = Scholarship.HIGH;
         for (int i = 0; i < resultTable.getNumberOfSubjects(lastSemester); i++) {
-            int result = resultTable.getRecord(lastSemester, i).getResult();
-            if (result == 3 && (scholarship == Scholarship.HIGH || scholarship == Scholarship.MIDDLE)) {
+            Results result = resultTable.getRecord(lastSemester, i).getResult();
+            if (result == Results.SATISFACTORILY && (scholarship == Scholarship.HIGH || scholarship == Scholarship.MIDDLE)) {
                 scholarship = Scholarship.LOW;
-            } else if (result == 4 && scholarship == Scholarship.HIGH) {
+            } else if (result == Results.GOOD && scholarship == Scholarship.HIGH) {
                 scholarship = Scholarship.MIDDLE;
-            } else if (result == 0 || result == 2) {
+            } else if (result == Results.FAIL) {
                 scholarship = Scholarship.NO;
             }
         }
@@ -185,9 +225,9 @@ public class RecordBook {
         double count = 0;
         for (int i = 1; i <= resultTable.getSemesters(); i++) {
             for (int j = 0; j < resultTable.getNumberOfSubjects(i); j++) {
-                int res = resultTable.getRecord(i, j).result;
-                if (res >= 2) {
-                    sum += res;
+                int resint = resultTable.getRecord(i, j).resultToInt();
+                if (resint > 2) {
+                    sum += resint;
                     count++;
                 }
             }
@@ -206,11 +246,11 @@ public class RecordBook {
         boolean hasProblems = false;
         for (int i = 1; i <= resultTable.getSemesters(); i++) {
             for (int j = 0; j < resultTable.getNumberOfSubjects(i); j++) {
-                int res = resultTable.getRecord(i, j).result;
+                int res = resultTable.getRecord(i, j).resultToInt();
                 if (res >= 2) {
                     countAll++;
                 }
-                if (res == 0 || res == 3 || res == 2) {
+                if (res == 0 || res == 3) {
                     hasProblems = true;
                 } else if (res == 5) {
                     countExc++;
@@ -226,24 +266,6 @@ public class RecordBook {
         }
     }
 
-    private String resultToString(int res) {
-        switch (res) {
-            case 0:
-                return "незачет";
-            case 1:
-                return "зачет";
-            case 2:
-                return "неудовлетворительно";
-            case 3:
-                return "удовлетворительно";
-            case 4:
-                return "хорошо";
-            case 5:
-                return "отлично";
-        }
-        return null;
-    }
-
     /**
      * напечатать всю возможную информацию из книжки
      */
@@ -255,7 +277,7 @@ public class RecordBook {
             System.out.println(i + " semester:");
             for (int j = 0; j < resultTable.getNumberOfSubjects(i); j++) {
                 Record record = resultTable.getRecord(i, j);
-                System.out.println(record.getSubject() + " -> " + resultToString(record.getResult()));
+                System.out.println(record.getSubject() + " -> " + record.resultToString(record.getResult()));
             }
             System.out.println("------------------------");
         }

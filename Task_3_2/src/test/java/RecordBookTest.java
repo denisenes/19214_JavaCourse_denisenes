@@ -63,6 +63,6 @@ public class RecordBookTest extends TestCase {
         book1.addResult("Math", "хорошо");
         book1.addResult("Programing", "отлично");
         book1.addResult("Physics", "отлично");
-        assertFalse(book.hasRedDiploma());
+        assertFalse(book1.hasRedDiploma());
     }
 }
