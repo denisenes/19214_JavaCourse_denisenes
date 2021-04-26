@@ -6,9 +6,13 @@ public class Mailbox {
     private final int size;
 
     private final ArrayDeque<Integer> buffer = new ArrayDeque<>();
+    private final EndFlag flag;
+    private volatile int waitCounter = 0; // нужен для того, чтобы считать количество спящих тредов
 
-    Mailbox(int size) {
+
+    Mailbox(int size, EndFlag flag) {
         this.size = size;
+        this.flag = flag;
     }
 
     // пытаемся добавить сообщение в буфер
@@ -22,7 +26,7 @@ public class Mailbox {
                     e.printStackTrace();
                 }
             }
-            buffer.addFirst(mess);
+            buffer.addLast(mess);
             notify();
         }
     }
@@ -33,7 +37,12 @@ public class Mailbox {
         synchronized (this) {
             while (buffer.size() == 0) {
                 try {
+                    waitCounter++;
                     wait();
+                    if (flag.get()) {
+                        return -1;
+                    }
+                    waitCounter--;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -50,4 +59,9 @@ public class Mailbox {
     public synchronized boolean isFilledUp() {
         return size - buffer.size() == 0;
     }
+
+    public int getWaitCounter() {
+        return waitCounter;
+    }
+
 }

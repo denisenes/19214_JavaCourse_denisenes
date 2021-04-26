@@ -21,16 +21,16 @@ public class Baker extends Thread {
 
         while (true) {
 
-            // если поток выдачи заказов сообщил об окончании смены
-            // и буфер заказов пуст, то завершаем исполнение потока
-            if (flag.get()) {
-                return;
-            }
 
             // 1) взять заказ из очереди заказов
             Integer message;
             synchronized (order_queue) {
                 message = order_queue.checkAndGetMessage();
+                // если поток выдачи заказов сообщил об окончании смены
+                // и буфер заказов пуст, то завершаем исполнение потока
+                if (flag.get()) {
+                    return;
+                }
                 System.out.println("Пекарь (id = " + id + ") взял заказ № " + message);
             }
 

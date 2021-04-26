@@ -23,17 +23,17 @@ public class Courier extends Thread {
     public void run() {
 
         while (true) {
-            // если поток выдачи заказов сообщил об окончании смены
-            // и буфер заказов пуст, то завершаем исполнение потока
-            if (flag.get()) {
-                return;
-            }
 
             // 1) взять заказы со склада, закинуть все в рюкзак
             Integer message;
             synchronized (warehouse) {
                 while (backpack.size() < backpack_size) {
                     message = warehouse.checkAndGetMessage();
+                    // если поток выдачи заказов сообщил об окончании смены
+                    // и буфер заказов пуст, то завершаем исполнение потока
+                    if (flag.get()) {
+                        return;
+                    }
                     System.out.println("Курьер (id = " + id + ") взял заказ № " + message);
                     backpack.add(message);
                     if (warehouse.isEmpty()) {

@@ -3,20 +3,20 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String [] args) {
-        int ordersN = 1000; // количество заказов
+        int ordersN = 300; // количество заказов
 
-        int bakersN = 5;
+        int bakersN = 20;
         int couriersN = 10;
+        EndFlag flag = new EndFlag();
 
         // инициализируем склад и очередь заказов
-        Mailbox warehouse = new Mailbox(10);
-        Mailbox orderQueue = new Mailbox(100);
+        Mailbox warehouse = new Mailbox(10, flag);
+        Mailbox orderQueue = new Mailbox(100, flag);
 
         // инициализируем работников
-        EndFlag flag = new EndFlag();
         ArrayList<Thread> threadList = new ArrayList<>();
 
-        Manager manager = new Manager(ordersN, flag, orderQueue, warehouse);
+        Manager manager = new Manager(ordersN, bakersN, couriersN, flag, orderQueue, warehouse);
         threadList.add(manager);
         manager.start();
 

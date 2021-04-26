@@ -6,11 +6,16 @@ public class Manager extends Thread {
     private final int orders_number;
     private final EndFlag flag;
 
-    Manager(int orders_number, EndFlag flag, Mailbox order_queue, Mailbox warehouse) {
+    private final int bN;
+    private final int cN;
+
+    Manager(int orders_number, int bN, int cN, EndFlag flag, Mailbox order_queue, Mailbox warehouse) {
         this.order_queue = order_queue;
         this.orders_number = orders_number;
         this.flag = flag;
         this.warehouse = warehouse;
+        this.bN = bN;
+        this.cN = cN;
     }
 
     @Override
@@ -21,11 +26,22 @@ public class Manager extends Thread {
         while (true) {
 
             // если мы выдали нужное количество заказов,
-            // то сообщаем работникам, что смена завершена и сами завершаем работу
+            // то дожидаемся, когда все потоки уснут, а затем завершаем их
             if (order >= orders_number && warehouse.isEmpty() && order_queue.isEmpty()) {
-                flag.set(true);
-                System.out.println("Менеджер сообщил об окончании смены");
-                return;
+                while (true) {
+                    // если все треды
+                    if (order_queue.getWaitCounter() == bN && warehouse.getWaitCounter() == cN) {
+                        System.out.println("Менеджер сообщил об окончании смены");
+                        flag.set(true);
+                        synchronized (order_queue) {
+                            order_queue.notifyAll();
+                        }
+                        synchronized (warehouse) {
+                            warehouse.notifyAll();
+                        }
+                        return;
+                    }
+                }
             }
 
             if (order >= orders_number) {
